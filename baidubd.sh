@@ -1,0 +1,56 @@
+#!/bin/sh
+# 常规定义
+MYSQL_USER="root"
+MYSQL_PASS="password"
+baidupan_DIR="/app/backdata/$(date +%Y-%m-%d)"
+BACK_DIR="/mnt/app/baidu/bdbackup"
+# 备份网站数据目录
+NGINX_DATA="/usr/local/nginx/conf/vhost"
+BACKUP_DEFAULT="/mnt/wwwroot"
+# 定义备份文件名
+mysql_DATA=mysql_$(date +"%Y%m%d").tar.gz
+www_DEFAULT=default_$(date +%Y%m%d).tar.gz
+nginx_CONFIG=nginx_$(date +%Y%m%d).tar.gz
+# 判断本地备份目录，不存在则创建
+if [ ! -d $BACK_DIR ] ;
+  then
+   /bin/mkdir -p "$BACK_DIR"
+fi
+ 
+# 进入备份目录
+cd $BACK_DIR
+ 
+# 备份所有数据库
+# 导出需要备份的数据库，清除不需要备份的库
+mysql -u$MYSQL_USER -p$MYSQL_PASS -B -N -e 'SHOW DATABASES' > $BACK_DIR/databases.db
+sed -i '/performance_schema/d' $BACK_DIR/databases.db
+sed -i '/information_schema/d' $BACK_DIR/databases.db
+sed -i '/mysql/d' $BACK_DIR/databases.db
+ 
+for db in $(cat $BACK_DIR/databases.db)
+ do
+   mysqldump -u$MYSQL_USER -p$MYSQL_PASS ${db} | gzip -9 - > $BACK_DIR/${db}.sql.gz
+done
+ 
+# 打包数据库
+ tar -zcvf $BACK_DIR/$mysql_DATA *.sql.gz >/dev/null 2>&1 
+ 
+# 打包本地网站数据
+ tar -zcvf $BACK_DIR/$www_DEFAULT $BACKUP_DEFAULT >/dev/null 2>&1 
+ 
+# 打包Nginx配置文件
+ tar -zcvf $BACK_DIR/$nginx_CONFIG $NGINX_DATA/*.conf >/dev/null 2>&1 
+ 
+# upload
+cd /mnt/app/baidu/
+/mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$nginx_CONFIG $nginx_CONFIG >>/mnt/app/baidu/nginx_log.log 2>&1
+/mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$mysql_DATA $mysql_DATA >>/mnt/app/baidu/mysql_log.log 2>&1
+/mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$www_DEFAULT $www_DEFAULT >>/mnt/app/baidu/wwwroot_log.log 2>&1
+
+# Delete all local backup
+#rm -rf $BACK_DIR
+
+#删除30天以前的文件
+find /mnt/app/baidu/bdbackup/*.tar.gz  -mtime +30 -print|xargs rm -f;
+ 
+exit 0
