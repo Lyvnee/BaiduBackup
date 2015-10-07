@@ -3,7 +3,7 @@
 MYSQL_USER="root"
 MYSQL_PASS="password"
 BAIDUPAN_DIR="vps/$(date +%Y-%m-%d)"
-BACK_DIR="/root/bdbackup"
+BACK_DIR="/root/baidu/bdbackup"
 
 # 备份网站数据目录
 NGINX_DATA="/usr/local/nginx/conf"
