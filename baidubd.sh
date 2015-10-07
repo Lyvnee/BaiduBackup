@@ -2,7 +2,7 @@
 # 常规定义
 MYSQL_USER="root"
 MYSQL_PASS="password"
-BAIDUPAN_DIR="$(date +%Y-%m-%d)"
+BAIDUPAN_DIR="/vps/$(date +%Y-%m-%d)"
 BACK_DIR="/root/bdbackup"
 
 # 备份网站数据目录
@@ -47,14 +47,14 @@ rm -rf  databases.db
  tar -zcvf $BACK_DIR/$nginx_CONFIG $NGINX_DATA >/dev/null 2>&1 
  
 # 上传
-/root/baidu/bpcs_uploader.php upload $BACK_DIR/$nginx_CONFIG $BAIDUPAN_DIR/$nginx_CONFIG >>/mnt/app/baidu/nginx_log.log 2>&1
-/root/baidu/bpcs_uploader.php upload $BACK_DIR/$mysql_DATA $BAIDUPAN_DIR/$mysql_DATA >>/mnt/app/baidu/mysql_log.log 2>&1
-/root/baidu/bpcs_uploader.php upload $BACK_DIR/$www_DEFAULT $BAIDUPAN_DIR/$www_DEFAULT >>/mnt/app/baidu/wwwroot_log.log 2>&1
+/root/baidu/bpcs_uploader.php upload $BACK_DIR/$nginx_CONFIG $BAIDUPAN_DIR/$nginx_CONFIG >>/root/baidu/nginx_log.log 2>&1
+/root/baidu/bpcs_uploader.php upload $BACK_DIR/$mysql_DATA $BAIDUPAN_DIR/$mysql_DATA >>/root/baidu/mysql_log.log 2>&1
+/root/baidu/bpcs_uploader.php upload $BACK_DIR/$www_DEFAULT $BAIDUPAN_DIR/$www_DEFAULT >>/root/baidu/wwwroot_log.log 2>&1
 
 # 删除所有文件
 #rm -rf $BACK_DIR
 
 #删除30天以前的文件
-find /root/bdbackup/*.gz  -mtime +30 -print|xargs rm -f;
+find *.gz  -mtime +30 -print|xargs rm -f;
  
 exit 0
