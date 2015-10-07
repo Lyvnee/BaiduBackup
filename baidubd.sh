@@ -2,7 +2,7 @@
 # 常规定义
 MYSQL_USER="root"
 MYSQL_PASS="password"
-BAIDUPAN_DIR="/vps/$(date +%Y-%m-%d)"
+BAIDUPAN_DIR="vps/$(date +%Y-%m-%d)"
 BACK_DIR="/root/bdbackup"
 
 # 备份网站数据目录
