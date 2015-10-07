@@ -2,7 +2,7 @@
 # 常规定义
 MYSQL_USER="root"
 MYSQL_PASS="password"
-baidupan_DIR="/app/bpcs_uploader/$(date +%Y-%m-%d)"
+BAIDUPAN_DIR="vps/$(date +%Y-%m-%d)"
 BACK_DIR="/mnt/app/baidu/bdbackup"
 # 备份网站数据目录
 NGINX_DATA="/usr/local/nginx/conf/vhost"
@@ -31,7 +31,7 @@ for db in $(cat $BACK_DIR/databases.db)
  do
    mysqldump -u$MYSQL_USER -p$MYSQL_PASS ${db} | gzip -9 - > $BACK_DIR/${db}.sql.gz
 done
- 
+rm -rf  databases.db
 # 打包数据库
  tar -zcvf $BACK_DIR/$mysql_DATA *.sql.gz --remove-files >/dev/null 2>&1 
  
@@ -42,9 +42,9 @@ done
  tar -zcvf $BACK_DIR/$nginx_CONFIG $NGINX_DATA >/dev/null 2>&1 
  
 # 上传
-/mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$nginx_CONFIG $nginx_CONFIG >>/mnt/app/baidu/nginx_log.log 2>&1
-/mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$mysql_DATA $mysql_DATA >>/mnt/app/baidu/mysql_log.log 2>&1
-/mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$www_DEFAULT $www_DEFAULT >>/mnt/app/baidu/wwwroot_log.log 2>&1
+/mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$nginx_CONFIG $BAIDUPAN_DIR/$nginx_CONFIG >>/mnt/app/baidu/nginx_log.log 2>&1
+/mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$mysql_DATA $BAIDUPAN_DIR/$mysql_DATA >>/mnt/app/baidu/mysql_log.log 2>&1
+/mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$www_DEFAULT $BAIDUPAN_DIR/$www_DEFAULT >>/mnt/app/baidu/wwwroot_log.log 2>&1
 
 # 删除所有文件
 #rm -rf $BACK_DIR
