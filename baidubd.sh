@@ -2,14 +2,14 @@
 # 常规定义
 MYSQL_USER="root"
 MYSQL_PASS="password"
-baidupan_DIR="/app/backdata/$(date +%Y-%m-%d)"
+baidupan_DIR="/app/bpcs_uploader/$(date +%Y-%m-%d)"
 BACK_DIR="/mnt/app/baidu/bdbackup"
 # 备份网站数据目录
 NGINX_DATA="/usr/local/nginx/conf/vhost"
 BACKUP_DEFAULT="/mnt/wwwroot"
 # 定义备份文件名
 mysql_DATA=mysql_$(date +"%Y%m%d").tar.gz
-www_DEFAULT=default_$(date +%Y%m%d).tar.gz
+www_DEFAULT=www_$(date +%Y%m%d).tar.gz
 nginx_CONFIG=nginx_$(date +%Y%m%d).tar.gz
 # 判断本地备份目录，不存在则创建
 if [ ! -d $BACK_DIR ] ;
@@ -33,24 +33,23 @@ for db in $(cat $BACK_DIR/databases.db)
 done
  
 # 打包数据库
- tar -zcvf $BACK_DIR/$mysql_DATA *.sql.gz >/dev/null 2>&1 
+ tar -zcvf $BACK_DIR/$mysql_DATA *.sql.gz --remove-files >/dev/null 2>&1 
  
 # 打包本地网站数据
  tar -zcvf $BACK_DIR/$www_DEFAULT $BACKUP_DEFAULT >/dev/null 2>&1 
  
 # 打包Nginx配置文件
- tar -zcvf $BACK_DIR/$nginx_CONFIG $NGINX_DATA/*.conf >/dev/null 2>&1 
+ tar -zcvf $BACK_DIR/$nginx_CONFIG $NGINX_DATA >/dev/null 2>&1 
  
-# upload
-cd /mnt/app/baidu/
+# 上传
 /mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$nginx_CONFIG $nginx_CONFIG >>/mnt/app/baidu/nginx_log.log 2>&1
 /mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$mysql_DATA $mysql_DATA >>/mnt/app/baidu/mysql_log.log 2>&1
 /mnt/app/baidu/bpcs_uploader.php upload $BACK_DIR/$www_DEFAULT $www_DEFAULT >>/mnt/app/baidu/wwwroot_log.log 2>&1
 
-# Delete all local backup
+# 删除所有文件
 #rm -rf $BACK_DIR
 
 #删除30天以前的文件
-find /mnt/app/baidu/bdbackup/*.tar.gz  -mtime +30 -print|xargs rm -f;
+find /mnt/app/baidu/bdbackup/*.gz  -mtime +30 -print|xargs rm -f;
  
 exit 0
